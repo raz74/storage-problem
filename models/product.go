@@ -7,13 +7,13 @@ type ProductReq struct {
 }
 
 type ProductResp struct {
-	Id             uint          `json:"id"`
-	Price          int           `json:"price"`
-	ExpirationData time.Duration `json:"expiration_data"`
+	Id             string    `json:"id"`
+	Price          float64   `json:"price"`
+	ExpirationData time.Time `json:"expiration_data"`
 }
 
 type Product struct {
-	Id             uint
-	Price          int
-	ExpirationData time.Duration
+	Id             string
+	Price          float64
+	ExpirationData time.Time
 }

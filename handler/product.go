@@ -15,6 +15,11 @@ func NewProductHandler(service *service.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
+func InitRest(e *echo.Echo, service *service.ProductService) {
+	h := NewProductHandler(service)
+	e.GET("promotions/id", h.GetProducts)
+}
+
 func (s *ProductHandler) GetProducts(c echo.Context) error {
 	req := models.ProductReq{}
 	err := c.Bind(&req)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+	"log"
 	"storage/models"
 )
 
@@ -18,7 +19,11 @@ type ProductRepository struct {
 }
 
 func (p *ProductRepository) Create(ctx context.Context, product []*models.Product) error {
-	return p.postgres.WithContext(ctx).Create(&product).Error
+	err := p.postgres.WithContext(ctx).Create(&product).Error
+	if err != nil {
+		log.Println("save data got err:", err)
+	}
+	return nil
 }
 
 func (p *ProductRepository) Get(ctx context.Context, id uint) (*models.Product, error) {

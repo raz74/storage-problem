@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"log"
+	"storage/config"
 	"storage/handler"
 	"storage/repository"
 	"storage/repository/database"
@@ -11,21 +13,30 @@ import (
 
 func main() {
 	fmt.Println("init program...")
-	postgresDb := database.ConnectPostgres()
-	redis := database.ConnectToRedis()
-
-	pRepo := repository.NewProductRepository(postgresDb, redis)
-	service := service2.NewProductService(pRepo)
-	//logger := InitLogger()
-	InitRest(service)
+	Init()
 }
 
-func InitRest(service *service2.ProductService) {
+func Init() {
+	err := config.LoadConfig()
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	//init data bases
+	postgresDb := database.ConnectPostgres()
+	redis := database.ConnectToRedis()
+	//init repositories
+	pRepo := repository.NewProductRepository(postgresDb, redis)
+	//init service
+	service := service2.NewProductService(pRepo)
+
+	// process csv file
+	go func() {
+		service.ProcessCsvData()
+	}()
 
 	echo := echo.New()
-
-	h := handler.NewProductHandler(service)
-
-	echo.GET("promotions/id", h.GetProducts)
+	handler.InitRest(echo, service)
 	echo.Logger.Fatal(echo.Start(":3000"))
+
 }

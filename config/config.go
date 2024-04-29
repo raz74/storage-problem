@@ -1,5 +1,7 @@
 package config
 
+import "github.com/spf13/viper"
+
 var cfg config
 
 type config struct {
@@ -21,6 +23,29 @@ type redis struct {
 	Sentinel   bool     `mapstructure:"REDIS_SENTINEL"`
 	Addrs      []string `mapstructure:"REDIS_ADDRS"`
 	Password   string   `mapstructure:"REDIS_PASSWORD"`
+}
+
+func LoadConfig() error {
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error if desired
+		} else {
+			// Config file was found but another error was produced
+		}
+	}
+	viper.AddConfigPath(".")
+	viper.SetConfigName("default")
+	viper.SetConfigType("env")
+
+	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
+
+	err = viper.Unmarshal(&cfg)
+	return nil
 }
 
 func GetPostgres() *postgres {
